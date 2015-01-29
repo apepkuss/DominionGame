@@ -39,7 +39,7 @@ if __name__ == "__main__":
             elif dominion.handCard(i, gameState) == enums.Card.gold:
                 money += 3
             elif dominion.handCard(i, gameState) == enums.Card.smithy:
-                smithyPos = i;
+                smithyPos = i
             elif dominion.handCard(i, gameState) == enums.Card.adventurer:
                 adventurerPos = i
             # Potential Bug: here should be a else statement.

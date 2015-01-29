@@ -2,6 +2,8 @@ __author__ = 'liux4@onid.oregonstate.edu'
 
 from enum import Enum
 
+MAX_PLAYERS = 4
+
 
 class Card(Enum):
     curse = 0
