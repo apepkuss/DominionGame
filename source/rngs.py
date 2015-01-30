@@ -12,7 +12,7 @@ stream = 0  # stream index, 0 is the default
 initialized = 0  # test for stream initialization
 
 
-def SelectStream(index):
+def selectStream(index):
     """
     Use this function to set the current random number generator stream --
     that stream from which the next random number will come.
@@ -22,7 +22,8 @@ def SelectStream(index):
     if initialized == 0 and stream != 0:  # protect against
         PlantSeeds(DEFAULT)  # un-initialized streams
 
-def PlantSeeds(x):
+
+def plantSeeds(x):
     """
     Use this function to set the state of all the random number generator
     streams by "planting" a sequence of states (seeds), one per stream,
@@ -45,3 +46,20 @@ def PlantSeeds(x):
         else:
             seed[j] = x + MODULUS
 
+
+def putSeed(x):
+
+    if x > 0:
+        x %= MODULUS  # correct if x is too large
+
+    if x <= 0:
+        while False:
+            userinput = input('\nEnter a positive integer seed (9 digits or less) >> ')
+            x = long(userinput)
+
+            if x < 1 or x > MODULUS:
+                print "\nInput out of range ... try again\n"
+            else:
+                break
+
+    seed[stream] = x

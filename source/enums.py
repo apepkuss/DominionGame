@@ -51,13 +51,13 @@ class GameState:
     embargoTokens = []
     outpostPlayed = 0
     outpostTurn = 0
-    whoseTurn = 0
-    phase = 0
+    whoseTurn = 0  # 0: player1; 1: player2
+    phase = 0  # 0: action phase; 1: buying phase; 2: cleanup phase
     numActions = 1  # Starts at 1 each turn
-    coins = 0  # Use as you see fit!
+    coins = 0  # the money you have
     numBuys = 1  # Starts at 1 each turn
     hand = [[]]
-    handCount = []
+    handCount = []  # the number of cards current player has in hand
     deck = [[]]
     deckCount = [[]]
     discard = [[]]

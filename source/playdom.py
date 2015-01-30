@@ -1,126 +1,138 @@
 __author__ = 'liux4@onid.oregonstate.edu'
 
+import sys
 import enums
 import dominion
 
 
 if __name__ == "__main__":
+    main(sys.argv[1:])
+
+
+def main(argv):
 
     print "This is the main function, which is the entry of Dominion game."
 
-    numPlayers = 2  # The number of players participating the game.
+    # The number of players
+    numPlayers = 2
+
+    # 10 kinds of kingdom cards
     kingdomCards = [enums.Card.adventurer, enums.Card.gardens, enums.Card.embargo,
                     enums.Card.village, enums.Card.minion, enums.Card.mine,
                     enums.Card.cutpurse, enums.Card.seahag, enums.Card.tribute,
                     enums.Card.smithy]
-    randomSeed = 1  # TODO: the value should be specified from the argument of the main function.
+
+    randomSeed = int(argv[0])
 
     print "Starting game."
-    gameState = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
-    money = 0
-    smithyPos = -1
-    adventurerPos = -1
-    i = 0
+    # money = 0
+    # smithyPos = -1
+    # adventurerPos = -1
 
     numSmithies = 0
     numAdventurers = 0
 
-    while not dominion.isGameOver(gameState):
+    while not dominion.isGameOver(game):
         money = 0
         smithyPos = -1
         adventurerPos = -1
 
-        for i in range(dominion.numHandCards(gameState)):
-            if dominion.handCard(i, gameState) == enums.Card.copper:
+        for i in range(dominion.numHandCards(game)):
+            if dominion.handCard(i, game) == enums.Card.copper:
                 money += 1
-            elif dominion.handCard(i, gameState) == enums.Card.silver:
+            elif dominion.handCard(i, game) == enums.Card.silver:
                 money += 2
-            elif dominion.handCard(i, gameState) == enums.Card.gold:
+            elif dominion.handCard(i, game) == enums.Card.gold:
                 money += 3
-            elif dominion.handCard(i, gameState) == enums.Card.smithy:
+            elif dominion.handCard(i, game) == enums.Card.smithy:
                 smithyPos = i
-            elif dominion.handCard(i, gameState) == enums.Card.adventurer:
+            elif dominion.handCard(i, game) == enums.Card.adventurer:
                 adventurerPos = i
             # Potential Bug: here should be a else statement.
 
-        if dominion.whoseTurn(gameState) == 0:
+        if dominion.whoseTurn(game) == 0:
             if smithyPos != -1:
                 print "0: smithy played from position {0:d}\n".format(smithyPos)
 
-            dominion.playCard(smithyPos, -1, -1, -1, gameState)
+            dominion.playCard(smithyPos, -1, -1, -1, game)
 
             print "smithy played.\n"
             money = 0
-            for i in range(dominion.numHandCards(gameState)):
-                if dominion.handCard(i, gameState) == enums.Card.copper:
-                    dominion.playCard(i, -1, -1, -1, gameState)
+            for i in range(dominion.numHandCards(game)):
+                if dominion.handCard(i, game) == enums.Card.copper:
+                    dominion.playCard(i, -1, -1, -1, game)
                     money += 1
-                elif dominion.handCard(i, gameState) == enums.Card.silver:
-                    dominion.playCard(i, -1, -1, -1, gameState)
+                elif dominion.handCard(i, game) == enums.Card.silver:
+                    dominion.playCard(i, -1, -1, -1, game)
                     money += 2
-                elif dominion.handCard(i, gameState) == enums.Card.gold:
-                    dominion.playCard(i, -1, -1, -1, gameState)
+                elif dominion.handCard(i, game) == enums.Card.gold:
+                    dominion.playCard(i, -1, -1, -1, game)
                     money += 3
 
             if money >= 8:
                 print "0: bought province\n"
-                dominion.buyCard(enums.Card.province, gameState)
+                result = dominion.buyCard(enums.Card.province, game)
+                assert (result != -1), "The returned value of buyCard should not be -1."
             elif money >= 6:
                 print "0: bought gold\n"
-                dominion.buyCard(enums.Card.gold, gameState)
+                result = dominion.buyCard(enums.Card.gold, game)
+                assert (result != -1), "The returned value of buyCard should not be -1."
             elif (money >= 4) and (numSmithies < 2):
                 print "0: bought smithy\n"
-                dominion.buyCard(enums.Card.smithy, gameState)
+                result = dominion.buyCard(enums.Card.smithy, game)
+                assert (result != -1), "The returned value of buyCard should not be -1."
                 numSmithies += 1
             elif money >= 3:
                 print "0: bought silver\n"
-                dominion.buyCard(enums.Card.silver, gameState)
+                result = dominion.buyCard(enums.Card.silver, game)
+                assert (result != -1), "The returned value of buyCard should not be -1."
 
             print "0: end turn\n"
-            dominion.endTurn(gameState)
+            dominion.endTurn(game)
 
         else:
 
             if adventurerPos != -1:
                 print "1: adventurer played from position {0:d}\n".format(adventurerPos)
 
-                dominion.playCard(adventurerPos, -1, -1, -1, gameState)
+                dominion.playCard(adventurerPos, -1, -1, -1, game)
 
                 money = 0
-                for i in range(dominion.numHandCards(gameState)):
+                for i in range(dominion.numHandCards(game)):
 
-                    if dominion.handCard(i, gameState) == enums.Card.copper:
-                        dominion.playCard(i, -1, -1, -1, gameState)
+                    if dominion.handCard(i, game) == enums.Card.copper:
+                        dominion.playCard(i, -1, -1, -1, game)
                         money += 1
-                    elif dominion.handCard(i, gameState) == enums.Card.silver:
-                        dominion.playCard(i, -1, -1, -1, gameState)
+                    elif dominion.handCard(i, game) == enums.Card.silver:
+                        dominion.playCard(i, -1, -1, -1, game)
                         money += 2
-                    elif dominion.handCard(i, gameState) == enums.Card.gold:
-                        dominion.playCard(i, -1, -1, -1, gameState)
+                    elif dominion.handCard(i, game) == enums.Card.gold:
+                        dominion.playCard(i, -1, -1, -1, game)
                         money += 3
 
             if money >= 8:
                 print "1: bought province\n"
-                dominion.buyCard(enums.Card.province, gameState)
+                dominion.buyCard(enums.Card.province, game)
             elif (money >= 6) and (numAdventurers < 2):
                 print "1: bought adventurer\n"
-                dominion.buyCard(enums.Card.adventurer, gameState)
+                dominion.buyCard(enums.Card.adventurer, game)
                 numAdventurers += 1
             elif money >= 6:
                 print "1: bought gold\n"
-                dominion.buyCard(enums.Card.gold, gameState)
+                dominion.buyCard(enums.Card.gold, game)
             elif money >= 3:
                 print "1: bought silver\n"
-                dominion.buyCard(enums.Card.silver, gameState)
+                dominion.buyCard(enums.Card.silver, game)
 
             print "1: endTurn\n"
-            dominion.endTurn(gameState)
+            dominion.endTurn(game)
 
-        print "Player 0: {0:d}\nPlayer 1: {1:d}\n".format(dominion.scoreFor(0, gameState), dominion.scoreFor(1, gameState))
+        print "Player 0: {0:d}\nPlayer 1: {1:d}\n".format(dominion.scoreFor(0, game), dominion.scoreFor(1, game))
 
     print "Finished game.\n"
-    print "Player 0: {0:d}\nPlayer 1: {1:d}\n".format(dominion.scoreFor(0, gameState), dominion.scoreFor(1, gameState))
+    print "Player 0: {0:d}\nPlayer 1: {1:d}\n".format(dominion.scoreFor(0, game), dominion.scoreFor(1, game))
 
 
 

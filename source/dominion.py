@@ -8,16 +8,23 @@ from array import *
 
 # APIs definition of dominion game
 
+
 def initializeGame(numPlayers, kingdomCards, randomSeed):
 
     """
+    Initialize a new game with all supplies, and shuffling deck and
+    drawing starting hands for all players.  Check that 10 cards selected
+    are in fact (different) kingdom cards, and that numPlayers is valid.
 
+    :param numPlayers: the number of players participating the game.
+    :param kingdomCards: the kingdom cards.
+    :param randomSeed:
     :rtype : int
     """
 
     # set up random number generator
-    rngs.SelectStream(1)
-    rngs.PutSeed(randomSeed)
+    rngs.selectStream(1)
+    rngs.putSeed(randomSeed)
 
     # check number of players
     if numPlayers > enums.MAX_PLAYERS or numPlayers < 2:
@@ -25,7 +32,7 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
 
     state = enums.GameState()
     # set number of players
-    state.players = numPlayers  # having problems here ******************************************
+    state.players = numPlayers  # having problems here
 
     # check selected kingdom cards are different
     for i in range(10):
@@ -59,7 +66,7 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
     state.supplyCount[enums.Card.gold] = 30
 
     # set number of Kingdom cards
-    for i in range(enums.Card.adventurer, enums.Card.treasuremap + 1):  # loop all cards
+    for i in range(int(enums.Card.adventurer), int(enums.Card.treasuremap) + 1):  # loop all cards
         for j in range(10):  # loop chosen cards
             if kingdomCards[j] == i:
                 # check if card is a 'Victory' Kingdom card
@@ -105,7 +112,7 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
             drawCard(i, state)
 
     # set embargo tokens to 0 for all supply piles
-    for i in range(enums.Card.treasuremap + 1):
+    for i in range(int(enums.Card.treasuremap) + 1):
         state.embargoTokens[i] = 0
 
     # initialize first player's turn
@@ -261,22 +268,21 @@ def buyCard(supplyPos, state):
 
     else:
         state.phase = 1
-        # state.supplyCount[supplyPos] -= 1
-        gainCard(supplyPos, state, 0, who)
+        result = gainCard(supplyPos, state, 0, who)
+        assert (result != -1), "The returned value of gainCard should not be -1."
 
-        state.coins = (state.coins) - (getCost(supplyPos))
+        # pay for the new card
+        state.coins -= getCost(supplyPos)
         state.numBuys -= 1
 
         # DEBUG
         print "You bought card number {0:d} for {0:d} coins. You now have {0:d} buys and {0:d} coins.\n".format(
             supplyPos, getCost(supplyPos), state.numBuys, state.coins)
 
-        # state->discard[who][state->discardCount[who]] = supplyPos
-        # state->discardCount[who]++
-
     return 0
 
 
+# Compute how many cards current player has in hand
 def numHandCards(state):
 
     return state.handCount[whoseTurn(state)]
@@ -498,7 +504,6 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
     if nextPlayer > (state.numPlayers - 1):
         nextPlayer = 0
 
-
     if card == enums.Card.adventurer:
         while drawntreasure < 2:
             if state.deckCount[currentPlayer] < 1:
@@ -560,7 +565,8 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
             # DEBUG
             print "Deck Count: {0:d}\n".format(state.handCount[currentPlayer] + state.deckCount[currentPlayer] + state.discardCount[currentPlayer])
 
-            gainCard(choice1, state, 0, currentPlayer)  # Gain the card
+            result = gainCard(choice1, state, 0, currentPlayer)  # Gain the card
+            assert (result != -1), "The returned value of gainCard should not be -1."
             x = 0  # No more buying cards
 
             # DEBUG
@@ -588,7 +594,8 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
         if getCost(state.hand[currentPlayer][choice1]) + 3 > getCost(choice2):
             return -1
 
-        gainCard(choice2, state, 2, currentPlayer)
+        result = gainCard(choice2, state, 2, currentPlayer)
+        assert (result != -1), "The returned value of gainCard should not be -1."
 
         # discard card from hand
         discardCard(handPos, currentPlayer, state, 0)
@@ -660,7 +667,9 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
                     print "Must gain an estate if there are any\n"
 
                     if supplyCount(enums.Card.estate, state) > 0:
-                        gainCard(enums.Card.estate, state, 0, currentPlayer)
+                        result = gainCard(enums.Card.estate, state, 0, currentPlayer)
+                        assert (result != -1), "The returned value of gainCard should not be -1."
+
                         state.supplyCount[enums.Card.estate] -= 1  # Decrement estates
 
                         if supplyCount(enums.Card.estate, state) == 0:
@@ -673,7 +682,9 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
         else:
             if supplyCount(enums.Card.estate, state) > 0:
-                gainCard(enums.Card.estate, state, 0, currentPlayer)  # Gain an estate
+                result = gainCard(enums.Card.estate, state, 0, currentPlayer)  # Gain an estate
+                assert (result != -1), "The returned value of gainCard should not be -1."
+
                 state.supplyCount[enums.Card.estate] -= 1  # Decrement Estates
 
                 if supplyCount(enums.Card.estate, state) == 0:
@@ -827,7 +838,8 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
         # each other player gains a copy of revealed card
         for i in range(0, state.numPlayers):
             if i != currentPlayer:
-                gainCard(state.hand[currentPlayer][choice1], state, 0, i)
+                result = gainCard(state.hand[currentPlayer][choice1], state, 0, i)
+                assert (result != -1), "The returned value of gainCard should not be -1."
 
         # discard played card from hand
         discardCard(handPos, currentPlayer, state, 0)
@@ -930,7 +942,8 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
             # gain 4 Gold cards
             for i in range(0, 4):
-                gainCard(enums.Card.gold, state, 1, currentPlayer)
+                result = gainCard(enums.Card.gold, state, 1, currentPlayer)
+                assert (result != -1), "The returned value of gainCard should not be -1."
 
             # return success
             return 1
@@ -955,7 +968,11 @@ def gainCard(supplyPos, state, toFlag, player):
     # toFlag = 1 : add to deck
     # toFlag = 2 : add to hand
 
-    if toFlag == 1:
+    if toFlag == 0:
+        state.discard[player][state.discardCount[player]] = supplyPos
+        state.discardCount[player] += 1
+
+    elif toFlag == 1:
         state.deck[player][state.deckCount[player]] = supplyPos
         state.deckCount[player] += 1
 
@@ -964,8 +981,7 @@ def gainCard(supplyPos, state, toFlag, player):
         state.handCount[player] += 1
 
     else:
-        state.discard[player][state.discardCount[player]] = supplyPos
-        state.discardCount[player] += 1
+        return -1
 
     # decrease number in supply pile
     state.supplyCount[supplyPos] -= 1
@@ -1075,3 +1091,63 @@ def drawCard(player, state):
         state.handCount[player] += 1  # Increment hand count
 
     return 0
+
+
+def getCost(card):
+
+    if card == enums.Card.curse:
+        return 0
+    elif card == enums.Card.estate:
+        return 2
+    elif card == enums.Card.duchy:
+        return 5
+    elif card == enums.Card.province:
+        return 8
+    elif card == enums.Card.copper:
+        return 0
+    elif card == enums.Card.silver:
+        return 3
+    elif card == enums.Card.gold:
+        return 6
+    elif card == enums.Card.adventurer:
+        return 6
+    elif card == enums.Card.councilroom:
+        return 5
+    elif card == enums.Card.feast:
+        return 4
+    elif card == enums.Card.gardens:
+        return 4
+    elif card == enums.Card.mine:
+        return 5
+    elif card == enums.Card.remodel:
+        return 4
+    elif card == enums.Card.smithy:
+        return 4
+    elif card == enums.Card.village:
+        return 3
+    elif card == enums.Card.baron:
+        return 4
+    elif card == enums.Card.greathall:
+        return 3
+    elif card == enums.Card.minion:
+        return 5
+    elif card == enums.Card.steward:
+        return 3
+    elif card == enums.Card.tribute:
+        return 5
+    elif card == enums.Card.ambassador:
+        return 3
+    elif card == enums.Card.cutpurse:
+        return 4
+    elif card == enums.Card.embargo:
+        return 2
+    elif card == enums.Card.outpost:
+        return 5
+    elif card == enums.Card.salvanger:
+        return 4
+    elif card == enums.Card.seahag:
+        return 4
+    elif card == enums.Card.treasuremap:
+        return 4
+    else:
+        return -1
