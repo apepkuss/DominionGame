@@ -4,7 +4,8 @@ import enums
 import rngs
 
 from math import *
-from array import *
+import random
+import copy
 
 # APIs definition of dominion game
 
@@ -22,72 +23,114 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
     :rtype : int
     """
 
-    # set up random number generator
-    rngs.selectStream(1)
-    rngs.putSeed(randomSeed)
+    # set up random number generator. TODO: refactor this random generator logic
+    #rngs.selectStream(1)
+    #rngs.putSeed(randomSeed)
 
-    # check number of players
+    # check the number of players
     if numPlayers > enums.MAX_PLAYERS or numPlayers < 2:
-        return -1  # TODO: replace 0 with a meaningful game state value.
+        return -1
 
-    state = enums.GameState()
-    # set number of players
-    state.players = numPlayers  # having problems here
+    # instantiate an object of GameState and set the number of players
+    state = enums.GameState(numPlayers)
+    # state.players = numPlayers
 
     # check selected kingdom cards are different
-    for i in range(10):
-        for j in range(10):
-            if j != i and kingdomCards[j] == kingdomCards[i]:
-                return -1  # TODO: replace 0 with a meaningful game state value.
-
-    # initialize supply
+    if len(kingdomCards) != len(set(kingdomCards)):
+        return -1
 
     # set number of Curse cards
+    # 10 Curse cards in the Supply for a 2 player game,
+    # 20 Curse cards for 3 players, and
+    # 30 Curse cards for 4 players.
     if numPlayers == 2:
-        state.supplyCount[enums.Card.curse] = 10
+        state.supplies.curseCount = 10
     elif numPlayers == 3:
-        state.supplyCount[enums.Card.curse] = 20
+        state.supplies.curseCount = 20
     else:
-        state.supplyCount[enums.Card.curse] = 30
+        state.supplies.curseCount = 30
 
-    # set number of Victory cards
+    # 48 Victory cards
+    # After each player takes 3 Estate cards,
+    # 3 or 4 player game: 12 Estate, 12 Duchy, and 12 Province cards in the Supply.
+    # 2 player game: 8 Estate, 8 Duchy, and 8 Province cards in the Supply.
     if numPlayers == 2:
-        state.supplyCount[enums.Card.estate] = 8
-        state.supplyCount[enums.Card.duchy] = 8
-        state.supplyCount[enums.Card.province] = 8
+        state.supplies.estateCount = 8
+        state.supplies.duchyCount = 8
+        state.supplies.provinceCount = 8
     else:
-        state.supplyCount[enums.Card.estate] = 12
-        state.supplyCount[enums.Card.duchy] = 12
-        state.supplyCount[enums.Card.province] = 12
+        state.supplies.estateCount = 12
+        state.supplies.duchyCount = 12
+        state.supplies.provinceCount = 12
 
     # set number of Treasure cards
-    state.supplyCount[enums.Card.copper] = 60 - (7 * numPlayers)
-    state.supplyCount[enums.Card.silver] = 40
-    state.supplyCount[enums.Card.gold] = 30
+    state.supplies.copperCount = 60
+    state.supplies.silverCount = 40
+    state.supplies.goldCount = 30
+
+    for i in range(numPlayers):
+        state.players[i].gold = 7
+        state.supplies.copperCount -= 7
 
     # set number of Kingdom cards
-    for i in range(int(enums.Card.adventurer), int(enums.Card.treasuremap) + 1):  # loop all cards
-        for j in range(10):  # loop chosen cards
-            if kingdomCards[j] == i:
-                # check if card is a 'Victory' Kingdom card
-                if kingdomCards[j] == enums.Card.greathall or kingdomCards[j] == enums.Card.gardens:
-                    if numPlayers == 2:
-                        state.supplyCount[i] = 8
-                    else:
-                        state.supplyCount[i] = 12
-                else:
-                    state.supplyCount[i] = 10
-
-                break
-            else:  # card is not in the set chosen for the game
-                state.supplyCount[i] = -1
-
-    # supply initialization complete
+    for i in range(10):
+        if kingdomCards[i] == enums.Card.adventurer:
+            state.supplies.adventurerCount = 10
+        elif kingdomCards[i] == enums.Card.bureaucrat:
+            state.supplies.bureaucratCount = 10
+        elif kingdomCards[i] == enums.Card.cellar:
+            state.supplies.cellarCount = 10
+        elif kingdomCards[i] == enums.Card.chapel:
+            state.supplies.chapelCount = 10
+        elif kingdomCards[i] == enums.Card.chancellor:
+            state.supplies.chancellorCount = 10
+        elif kingdomCards[i] == enums.Card.councilroom:
+            state.supplies.councilroomCount = 10
+        elif kingdomCards[i] == enums.Card.feast:
+            state.supplies.feastCount = 10
+        elif kingdomCards[i] == enums.Card.festival:
+            state.supplies.festivalCount = 10
+        elif kingdomCards[i] == enums.Card.gardens:
+            state.supplies.gardensCount = 12  # victory cards
+        elif kingdomCards[i] == enums.Card.laboratory:
+            state.supplies.laboratoryCount = 10
+        elif kingdomCards[i] == enums.Card.library:
+            state.supplies.libraryCount = 10
+        elif kingdomCards[i] == enums.Card.market:
+            state.supplies.marketCount = 10
+        elif kingdomCards[i] == enums.Card.militia:
+            state.supplies.militiaCount = 10
+        elif kingdomCards[i] == enums.Card.mine:
+            state.supplies.mineCount = 10
+        elif kingdomCards[i] == enums.Card.moat:
+            state.supplies.moatCount = 10  # action-reaction card
+        elif kingdomCards[i] == enums.Card.moneylender:
+            state.supplies.moneylenderCount = 10
+        elif kingdomCards[i] == enums.Card.remodel:
+            state.supplies.remodelCount = 10
+        elif kingdomCards[i] == enums.Card.smithy:
+            state.supplies.smithyCount = 10
+        elif kingdomCards[i] == enums.Card.spy:
+            state.supplies.spyCount = 10
+        elif kingdomCards[i] == enums.Card.thief:
+            state.supplies.thiefCount = 10
+        elif kingdomCards[i] == enums.Card.throneroom:
+            state.supplies.throneroomCount = 10
+        elif kingdomCards[i] == enums.Card.village:
+            state.supplies.villageCount = 10
+        elif kingdomCards[i] == enums.Card.witch:
+            state.supplies.witchCount = 10
+        elif kingdomCards[i] == enums.Card.woodcutter:
+            state.supplies.woodcutterCount = 10
+        elif kingdomCards[i] == enums.Card.workshop:
+            state.supplies.workshopCount = 10
+        else:
+            return None
 
     # set player decks
-    for i in range(numPlayers):
-
+    for i in range(0, numPlayers):
         state.deckCount[i] = 0
+        state.players[i].cardsInDeck.append
         for j in range(3):
             state.deck[i][j] = enums.Card.estate
             state.deckCount[i] += 1
@@ -97,12 +140,12 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
             state.deckCount[i] += 1
 
     # shuffle player decks
-    for i in range(numPlayers):
-        if shuffle(i, state) < 0:
-            return -1  # TODO: replace -1 with a meaningful game state value.
+    for i in range(0, numPlayers):
+        result = shuffle(i, state)
+        assert (result == 0), "Failed to shuffle the deck of player{0:d}.\n".format(i)
 
     # draw player hands
-    for i in range(numPlayers):
+    for i in range(0, numPlayers):
         # initialize hand size to zero
         state.handCount[i] = 0
         state.discardCount[i] = 0
@@ -112,7 +155,7 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
             drawCard(i, state)
 
     # set embargo tokens to 0 for all supply piles
-    for i in range(int(enums.Card.treasuremap) + 1):
+    for i in range(0, int(enums.Card.treasuremap) + 1):
         state.embargoTokens[i] = 0
 
     # initialize first player's turn
@@ -123,75 +166,200 @@ def initializeGame(numPlayers, kingdomCards, randomSeed):
     state.playedCardCount = 0
     state.whoseTurn = 0
     state.handCount[state.whoseTurn] = 0
-    # int it; move to top
-
-    # Moved draw cards to here, only drawing at the start of a turn
-    for i in range(5):
-        drawCard(state.whoseTurn, state)
 
     updateCoins(state.whoseTurn, state, 0)
-
-    return 0  # TODO: replace 0 with a meaningful game state value.
-
-
-# TODO: NEED MORE EFFORTS
-def shuffle(player, state):
-
-    assert isinstance(state, enums.GameState)
-
-    newDeck = []
-    newDeckPos = 0
-
-    if state.deckCount[player] < 1:
-        return -1
-
-    # TODO: refactor qsort
-    # qsort(state.deck[player], state.deckCount[player], sizeof(int), compare)
-    qsort(state.deck[player])
-
-    # SORT CARDS IN DECK TO ENSURE DETERMINISM!
-    while state.deckCount[player] > 0:
-        card = math.floor(random() * state.deckCount[player])  # TODO: refactor
-        newDeck[newDeckPos] = state.deck[player][card]
-        newDeckPos += 1
-
-        for i in range(card, state.deckCount[player]-1):
-            state.deck[player][i] = state.deck[player][i+1]
-        state.deckCount[player] -= 1
-
-    for i in range(newDeckPos):
-        state.deck[player][i] = newDeck[i]
-        state.deckCount[player] += 1
 
     return 0
 
 
-def random():
+def initialize(numPlayers, kingdomCards, randomseed):
 
-    """
-    Random returns a pseudo-random real number uniformly distributed between 0.0 and 1.0.
+    # instantiate an object of GameState and set the number of players
+    game = enums.GameState(numPlayers)
 
-    :return:
-    """
+    if len(game.error) > 0:
+        return game
 
-    STREAMS = 256
-    MODULUS = 2147483647
-    MULTIPLIER = 48271
-    DEFAULT = 123456789
+    # check selected kingdom cards are different
+    if len(kingdomCards) != len(set(kingdomCards)):
+        game.error = "There are duplicate kingdom cards in the supplies."
+        return game
 
-    seed = array('l', [DEFAULT])
-    stream = 0
-
-    Q = MODULUS / MULTIPLIER
-    R = MODULUS % MULTIPLIER
-    t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q)
-
-    if t > 0:
-        seed[stream] = t
+    # set number of Curse cards
+    # 10 Curse cards in the Supply for a 2 player game,
+    # 20 Curse cards for 3 players, and
+    # 30 Curse cards for 4 players.
+    if numPlayers == 2:
+        game.supplies.curseCount = 10
+    elif numPlayers == 3:
+        game.supplies.curseCount = 20
     else:
-        seed[stream] = t + MODULUS
+        game.supplies.curseCount = 30
 
-    return seed[stream] / MODULUS
+    # 48 Victory cards
+    # After each player takes 3 Estate cards,
+    # 3 or 4 player game: 12 Estate, 12 Duchy, and 12 Province cards in the Supply.
+    # 2 player game: 8 Estate, 8 Duchy, and 8 Province cards in the Supply.
+    if numPlayers == 2:
+        game.supplies.estateCount = 8
+        game.supplies.duchyCount = 8
+        game.supplies.provinceCount = 8
+    else:
+        game.supplies.estateCount = 12
+        game.supplies.duchyCount = 12
+        game.supplies.provinceCount = 12
+
+    # set number of Treasure cards
+    game.supplies.copperCount = 60
+    game.supplies.silverCount = 40
+    game.supplies.goldCount = 30
+
+    # for i in range(0, numPlayers):
+    #     game.players[i].copper = 7
+    #     game.supplies.copperCount -= 7
+
+    # # set number of Kingdom cards
+    game.supplies.setSupplyKingdoms(kingdomCards)
+
+    # for i in range(0, 10):
+    #     if kingdomCards[i] == enums.Card.adventurer:
+    #         game.supplies.adventurerCount = 10
+    #     elif kingdomCards[i] == enums.Card.bureaucrat:
+    #         game.supplies.bureaucratCount = 10
+    #     elif kingdomCards[i] == enums.Card.cellar:
+    #         game.supplies.cellarCount = 10
+    #     elif kingdomCards[i] == enums.Card.chapel:
+    #         game.supplies.chapelCount = 10
+    #     elif kingdomCards[i] == enums.Card.chancellor:
+    #         game.supplies.chancellorCount = 10
+    #     elif kingdomCards[i] == enums.Card.councilroom:
+    #         game.supplies.councilroomCount = 10
+    #     elif kingdomCards[i] == enums.Card.feast:
+    #         game.supplies.feastCount = 10
+    #     elif kingdomCards[i] == enums.Card.festival:
+    #         game.supplies.festivalCount = 10
+    #     elif kingdomCards[i] == enums.Card.gardens:
+    #         game.supplies.gardensCount = 12  # victory cards
+    #     elif kingdomCards[i] == enums.Card.laboratory:
+    #         game.supplies.laboratoryCount = 10
+    #     elif kingdomCards[i] == enums.Card.library:
+    #         game.supplies.libraryCount = 10
+    #     elif kingdomCards[i] == enums.Card.market:
+    #         game.supplies.marketCount = 10
+    #     elif kingdomCards[i] == enums.Card.militia:
+    #         game.supplies.militiaCount = 10
+    #     elif kingdomCards[i] == enums.Card.mine:
+    #         game.supplies.mineCount = 10
+    #     elif kingdomCards[i] == enums.Card.moat:
+    #         game.supplies.moatCount = 10  # action-reaction card
+    #     elif kingdomCards[i] == enums.Card.moneylender:
+    #         game.supplies.moneylenderCount = 10
+    #     elif kingdomCards[i] == enums.Card.remodel:
+    #         game.supplies.remodelCount = 10
+    #     elif kingdomCards[i] == enums.Card.smithy:
+    #         game.supplies.smithyCount = 10
+    #     elif kingdomCards[i] == enums.Card.spy:
+    #         game.supplies.spyCount = 10
+    #     elif kingdomCards[i] == enums.Card.thief:
+    #         game.supplies.thiefCount = 10
+    #     elif kingdomCards[i] == enums.Card.throneroom:
+    #         game.supplies.throneroomCount = 10
+    #     elif kingdomCards[i] == enums.Card.village:
+    #         game.supplies.villageCount = 10
+    #     elif kingdomCards[i] == enums.Card.witch:
+    #         game.supplies.witchCount = 10
+    #     elif kingdomCards[i] == enums.Card.woodcutter:
+    #         game.supplies.woodcutterCount = 10
+    #     elif kingdomCards[i] == enums.Card.workshop:
+    #         game.supplies.workshopCount = 10
+    #     else:
+    #         game.error += 'Undefined kingdom card: {0:s}.\n'.format(str(kingdomCards[i]))
+    #         return game
+
+    # set deck for each player
+    for i in range(0, numPlayers):
+        for j in range(0, 3):
+            game.players[i].cardsInDeck.append(enums.Card.estate)
+
+        for k in range(0, 7):
+            game.players[i].cardsInDeck.append(enums.Card.copper)
+        game.supplies.copperCount -= 7
+
+    # shuffle decks
+    for i in range(0, numPlayers):
+        result = shuffle(i, game)
+        if result == -1:
+            game.error += "Failed to shuffle the deck of player{0:d}.\n".format(i)
+            return game
+
+    # draw 5 cards from each player's deck
+    for i in range(0, numPlayers):
+        # game.players[i].handCardCount = 0
+        # game.players[i].discardCardCount = 0
+
+        # draw card
+        for j in range(0, 5):
+            drawCard(i, game)
+
+    # set embargo tokens to 0 for all supply piles
+    # for i in range(0, int(enums.Card.treasuremap) + 1):
+    #     game.embargoTokens[i] = 0
+
+    # initialize first player's turn
+    game.phase = enums.GamePhase.action
+    game.playedCardCount = 0
+    game.outpostPlayed = 0  # TODO: what that means?
+    game.numActions = 1
+    game.numBuys = 1
+
+    # game.handCount[game.whoseTurn] = 0
+
+    for i in range(0, len(game.players)):
+        updateCoins(i, game, 0)
+
+    return game
+
+
+def shuffle(player, state):
+    if state.players[player].deckCount() < 1:
+        state.error = "Failed to shuffle the cards on the deck of Player{0:d}. The deck is empty."
+        return -1
+
+    try:
+        random.shuffle(state.players[player].cardsInDeck)
+    except:
+        state.error = "Unexpected error: " + sys.exc_info()[0]
+        return -1
+
+    return 0
+
+
+# def random():
+#
+#     """
+#     Random returns a pseudo-random real number uniformly distributed between 0.0 and 1.0.
+#
+#     :return:
+#     """
+#
+#     STREAMS = 256
+#     MODULUS = 2147483647
+#     MULTIPLIER = 48271
+#     DEFAULT = 123456789
+#
+#     seed = array('l', [DEFAULT])
+#     stream = 0
+#
+#     Q = MODULUS / MULTIPLIER
+#     R = MODULUS % MULTIPLIER
+#     t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q)
+#
+#     if t > 0:
+#         seed[stream] = t
+#     else:
+#         seed[stream] = t + MODULUS
+#
+#     return seed[stream] / MODULUS
 
 
 def qsort(cards):
@@ -206,35 +374,43 @@ def qsort(cards):
 
 
 # TODO: CHECK THE RETURN VALUE
-def playCard(handPos, choice1, choice2, choice3, state):
+def playCard(handPos, choice1, choice2, choice3, game):
+    """
+    Play card with index handPos from current player's hand
 
-    assert isinstance(state, enums.GameState)
+    :param handPos: the index of the card to play
+    :param choice1:
+    :param choice2:
+    :param choice3:
+    :param game:
+    :return:
+    """
 
     #  check if it is the right phase
-    if state.phase != 0:
+    if game.phase != 0:
         return -1
 
     # check if player has enough actions
-    if state.numActions < 1:
+    if game.numActions < 1:
         return -1
 
     # get card played
-    card = handCard(handPos, state)
+    card = handCard(handPos, game)
 
     # check if selected card is an action
-    if card < enums.Card.adventurer or card > enums.Card.treasuremap:
-        return -1
+    # if card < enums.Card.adventurer or card > enums.Card.treasuremap:
+    #     return -1
 
     # play card
     coinbonus = 0  # tracks coins gain from actions
-    if cardEffect(card, choice1, choice2, choice3, state, handPos, coinbonus) < 0:
+    if cardEffect(card, choice1, choice2, choice3, game, handPos, coinbonus) < 0:
         return -1
 
     # reduce number of actions
-    state.numActions
+    game.numActions -= 1
 
     # update coins (Treasure cards may be added with card draws)
-    updateCoins(state.whoseTurn, state, coinbonus)
+    updateCoins(game.whoseTurn, game, coinbonus)
 
     return 0
 
@@ -284,21 +460,96 @@ def buyCard(supplyPos, state):
 
 # Compute how many cards current player has in hand
 def numHandCards(state):
-
-    return state.handCount[whoseTurn(state)]
+    return state.players[state.whoseTurn].handCardCount
 
 
 def handCard(handPos, state):
-
-    currentPlayer = whoseTurn(state)
-    return state.hand[currentPlayer][handPos]
+    return state.players[state.whoseTurn].handCards[handPos]
 
 
 def supplyCount(card, state):
 
-    assert isinstance(state, enums.GameState)
+    # curse card
+    if card == enums.Card.curse:
+        return state.supplies.curseCount
 
-    return state.supplyCount[card]
+    # Victory cards
+    if card == enums.Card.estate:
+        return state.supplies.estateCount
+    elif card == enums.Card.duchy:
+        return state.supplies.duchyCount
+    elif card == enums.Card.province:
+        return state.supplies.provinceCount
+
+    # Treasure cards
+    if card == enums.Card.copper:
+        return state.supplies.copperCount
+    elif card == enums.Card.silver:
+        return state.supplies.silverCount
+    elif card == enums.Card.gold:
+        return state.supplies.goldCount
+
+    # Kingdom cards
+    if enums.Card.adventurer <= card <= enums.Card.workshop:
+        return state.supplies.kingdoms[card]
+
+    return -1
+
+
+    # if card == enums.Card.adventurer:
+    #     return state.supplies.adventurerCount
+    # elif card == enums.Card.adventurer:
+    #     return state.supplies.adventurerCount
+    # elif card == enums.Card.bureaucrat:
+    #     return state.supplies.bureaucratCount
+    # elif card == enums.Card.cellar:
+    #     return state.supplies.cellarCount
+    # elif card == enums.Card.chapel:
+    #     return state.supplies.chapelCount
+    # elif card == enums.Card.chancellor:
+    #     return state.supplies.chancellorCount
+    # elif card == enums.Card.councilroom:
+    #     return state.supplies.councilroomCount
+    # elif card == enums.Card.feast:
+    #     return state.supplies.feastCount
+    # elif card == enums.Card.festival:
+    #     return state.supplies.festivalCount
+    # elif card == enums.Card.gardens:
+    #     return state.supplies.gardensCount  # victory cards
+    # elif card == enums.Card.laboratory:
+    #     return state.supplies.laboratoryCount
+    # elif card == enums.Card.library:
+    #     return state.supplies.libraryCount
+    # elif card == enums.Card.market:
+    #     return state.supplies.marketCount
+    # elif card == enums.Card.militia:
+    #     return state.supplies.militiaCount
+    # elif card == enums.Card.mine:
+    #     return state.supplies.mineCount
+    # elif card == enums.Card.moat:
+    #     return state.supplies.moatCount  # action-reaction card
+    # elif card == enums.Card.moneylender:
+    #     return state.supplies.moneylenderCount
+    # elif card == enums.Card.remodel:
+    #     return state.supplies.remodelCount
+    # elif card == enums.Card.smithy:
+    #     return state.supplies.smithyCount
+    # elif card == enums.Card.spy:
+    #     return state.supplies.spyCount
+    # elif card == enums.Card.thief:
+    #     return state.supplies.thiefCount
+    # elif card == enums.Card.throneroom:
+    #     return state.supplies.throneroomCount
+    # elif card == enums.Card.village:
+    #     return state.supplies.villageCount
+    # elif card == enums.Card.witch:
+    #     return state.supplies.witchCount
+    # elif card == enums.Card.woodcutter:
+    #     return state.supplies.woodcutterCount
+    # elif card == enums.Card.workshop:
+    #     return state.supplies.workshopCount
+    # else:
+    #     return -1
 
 
 def fullDeckCount(player, card, state):
@@ -323,124 +574,147 @@ def fullDeckCount(player, card, state):
 
 
 def whoseTurn(state):
-
-    assert isinstance(state, enums.GameState)
-    assert isinstance(state.whoseTurn, enums.GameState)
     return state.whoseTurn
 
 
 # TODO: CHECK THE RETURN VALUE
 def endTurn(state):
 
-    assert isinstance(state, enums.GameState)
-
-    currentPlayer = whoseTurn(state)
-
-    # Discard hand
-    for i in range(state.handCount[currentPlayer]):
-        state.discardCount[currentPlayer] += 1
-        state.discard[currentPlayer][state.discardCount[currentPlayer]] = state.hand[currentPlayer][i]
-        state.hand[currentPlayer][i] = -1  # Set card to -1
-
-    state.handCount[currentPlayer] = 0  # Reset hand count
-
-    # Code for determining the player
-    if currentPlayer < (state.players - 1):
-        state.whoseTurn = currentPlayer + 1  # Still safe to increment
-    else:
-        state.whoseTurn = 0  # Max player has been reached, loop back around to player 1
-
-    state.outpostPlayed = 0
-    state.phase = 0
-    state.numActions = 1
-    state.coins = 0
-    state.numBuys = 1
-    state.playedCardCount = 0
-    state.handCount[state.whoseTurn] = 0
-
-    # int k; move to top
-    # Next player draws hand
-    for k in range(5):
-        drawCard(state.whoseTurn, state)  # Draw a card
-
-    # Update money
-    updateCoins(state.whoseTurn, state, 0)
+    # assert isinstance(state, enums.GameState)
+    #
+    # currentPlayer = whoseTurn(state)
+    #
+    # # Discard hand
+    # for i in range(state.handCount[currentPlayer]):
+    #     state.discardCount[currentPlayer] += 1
+    #     state.discard[currentPlayer][state.discardCount[currentPlayer]] = state.hand[currentPlayer][i]
+    #     state.hand[currentPlayer][i] = -1  # Set card to -1
+    #
+    # state.handCount[currentPlayer] = 0  # Reset hand count
+    #
+    # # Code for determining the player
+    # if currentPlayer < (state.players - 1):
+    #     state.whoseTurn = currentPlayer + 1  # Still safe to increment
+    # else:
+    #     state.whoseTurn = 0  # Max player has been reached, loop back around to player 1
+    #
+    # state.outpostPlayed = 0
+    # state.phase = 0
+    # state.numActions = 1
+    # state.coins = 0
+    # state.numBuys = 1
+    # state.playedCardCount = 0
+    # state.handCount[state.whoseTurn] = 0
+    #
+    # # int k; move to top
+    # # Next player draws hand
+    # for k in range(5):
+    #     drawCard(state.whoseTurn, state)  # Draw a card
+    #
+    # # Update money
+    # updateCoins(state.whoseTurn, state, 0)
 
     return 0
 
 
 def isGameOver(state):
 
-    # TODO: add concrete logic
+    # The game ends at the end of any player turn when either
+    # 1) the Supply pile of Province cards is empty or
+    # 2) any 3 Supply piles are empty.
 
-    # if stack of Province cards is empty, the game ends
-    if state.supplyCount[enums.Card.province] == 0:
+    if state.supplies.provinceCount == 0:
         return True
 
-    # if three supply pile are at 0, the game ends
-    j = 0
-    for i in range(25):
-        if state.supplyCount[i] == 0:
-            j += 1
+    counter = 0
 
-    if j >= 3:
+    # curse card
+    if state.supplies.curseCount == 0:
+        counter += 1
+
+    # Victory cards
+    if state.supplies.estateCount == 0:
+        counter += 1
+
+    if state.supplies.duchyCount == 0:
+        counter += 1
+
+    if state.supplies.provinceCount == 0:
+        counter += 1
+
+    # Treasure cards
+    if state.supplies.copperCount == 0:
+        counter += 1
+
+    if state.supplies.silverCount == 0:
+        counter += 1
+
+    if state.supplies.goldCount == 0:
+        counter += 1
+
+    for i in range(0, len(state.supplies.kingdoms)):
+        if state.supplies.kingdoms[i] == 0:
+            counter += 1
+
+    if counter >= 3:
         return True
-
-    return False
+    else:
+        return False
 
 
 def scoreFor(player, state):
 
-    assert isinstance(state, enums.GameState)
+    # assert isinstance(state, enums.GameState)
+    #
+    # score = 0
+    #
+    # # score from hand
+    # for i in range(state.handCount[player]):
+    #     if state.hand[player][i] == enums.Card.curse:
+    #         score -= 1
+    #     elif state.hand[player][i] == enums.Card.estate:
+    #         score += 1
+    #     elif state.hand[player][i] == enums.Card.duchy:
+    #         score += 3
+    #     elif state.hand[player][i] == enums.Card.province:
+    #         score += 6
+    #     elif state.hand[player][i] == enums.Card.greathall:
+    #         score += 1
+    #     elif state.hand[player][i] == enums.Card.gardens:
+    #         score += (fullDeckCount(player, 0, state) / 10)
+    #
+    # # score from discard
+    # for i in range(state.discard[player]):
+    #     if state.discard[player][i] == enums.Card.curse:
+    #         score -= 1
+    #     elif state.discard[player][i] == enums.Card.estate:
+    #         score += 1
+    #     elif state.discard[player][i] == enums.Card.duchy:
+    #         score += 3
+    #     elif state.discard[player][i] == enums.Card.province:
+    #         score += 6
+    #     elif state.discard[player][i] == enums.Card.greathall:
+    #         score += 1
+    #     elif state.discard[player][i] == enums.Card.gardens:
+    #         score += (fullDeckCount(player, 0, state) / 10)
+    #
+    # # score from deck
+    # for i in range(state.deck[player]):
+    #     if state.deck[player][i] == enums.Card.curse:
+    #         score -= 1
+    #     elif state.deck[player][i] == enums.Card.estate:
+    #         score += 1
+    #     elif state.deck[player][i] == enums.Card.duchy:
+    #         score += 3
+    #     elif state.deck[player][i] == enums.Card.province:
+    #         score += 6
+    #     elif state.deck[player][i] == enums.Card.greathall:
+    #         score += 1
+    #     elif state.deck[player][i] == enums.Card.gardens:
+    #         score += (fullDeckCount(player, 0, state) / 10)
 
-    score = 0
-
-    # score from hand
-    for i in range(state.handCount[player]):
-        if state.hand[player][i] == enums.Card.curse:
-            score -= 1
-        elif state.hand[player][i] == enums.Card.estate:
-            score += 1
-        elif state.hand[player][i] == enums.Card.duchy:
-            score += 3
-        elif state.hand[player][i] == enums.Card.province:
-            score += 6
-        elif state.hand[player][i] == enums.Card.greathall:
-            score += 1
-        elif state.hand[player][i] == enums.Card.gardens:
-            score += (fullDeckCount(player, 0, state) / 10)
-
-    # score from discard
-    for i in range(state.discard[player]):
-        if state.discard[player][i] == enums.Card.curse:
-            score -= 1
-        elif state.discard[player][i] == enums.Card.estate:
-            score += 1
-        elif state.discard[player][i] == enums.Card.duchy:
-            score += 3
-        elif state.discard[player][i] == enums.Card.province:
-            score += 6
-        elif state.discard[player][i] == enums.Card.greathall:
-            score += 1
-        elif state.discard[player][i] == enums.Card.gardens:
-            score += (fullDeckCount(player, 0, state) / 10)
-
-    # score from deck
-    for i in range(state.deck[player]):
-        if state.deck[player][i] == enums.Card.curse:
-            score -= 1
-        elif state.deck[player][i] == enums.Card.estate:
-            score += 1
-        elif state.deck[player][i] == enums.Card.duchy:
-            score += 3
-        elif state.deck[player][i] == enums.Card.province:
-            score += 6
-        elif state.deck[player][i] == enums.Card.greathall:
-            score += 1
-        elif state.deck[player][i] == enums.Card.gardens:
-            score += (fullDeckCount(player, 0, state) / 10)
-
-    return score
+    # return score
+    return 0
 
 
 # TODO: CHECK THE RETURN VALUE
@@ -492,90 +766,92 @@ def getWinners(players, state):
 # TODO: NEED MORE EFFORTS
 def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
-    assert isinstance(state, enums.GameState)
-
     currentPlayer = whoseTurn(state)
-    nextPlayer = currentPlayer + 1
+    nextPlayer = (currentPlayer + 1) % len(state.players)
 
     tributeRevealedCards = [-1, -1]
     temphand = []  # temphand[MAX_HAND]  # moved above the if statement
-    drawntreasure = 0
-    z = 0  # this is the counter for the temp hand
-    if nextPlayer > (state.numPlayers - 1):
-        nextPlayer = 0
 
-    if card == enums.Card.adventurer:
+    z = 0  # this is the counter for the temp hand
+
+    if card == enums.Card.adventurer:  # 7
+        # reveal cards from your deck until you reveal 2 Treasure cards.
+        # put those Treasure cards into your hands and discard the other
+        # revealed cards.
+        drawntreasure = 0
         while drawntreasure < 2:
-            if state.deckCount[currentPlayer] < 1:
+            if state.players[currentPlayer].deckCount() < 1:
                 # if the deck is empty we need to shuffle discard and add to deck
                 shuffle(currentPlayer, state)
 
-                drawCard(currentPlayer, state)
-                # top card of hand is most recently drawn card.
-                cardDrawn = state.hand[currentPlayer][state.handCount[currentPlayer]-1]
+            drawCard(currentPlayer, state)
 
-                if cardDrawn == enums.Card.copper or cardDrawn == enums.Card.silver or cardDrawn == enums.Card.gold:
-                    drawntreasure += 1
-                else:
-                    temphand[z] = cardDrawn
-                    # this should just remove the top card (the most recently drawn one).
-                    state.handCount[currentPlayer] -= 1
-                    z += 1
+            # top card of hand is most recently drawn card.
+            cardDrawn = state.players[currentPlayer].handCards[-1]
 
-        while z - 1 >= 0:
-            # discard all cards in play that have been drawn
-            state.discardCount[currentPlayer] += 1
-            state.discard[currentPlayer][state.discardCount[currentPlayer]] = temphand[z-1]
-            z -= 1
+            if cardDrawn == enums.Card.copper or cardDrawn == enums.Card.silver or cardDrawn == enums.Card.gold:
+                drawntreasure += 1
+            else:
+                state.players[currentPlayer].handCards.pop(-1)
+                state.players[currentPlayer].discardCards.append(cardDrawn)
+
+        state.players[state.whoseTurn].handCards.pop(handPos)
+        state.players[state.whoseTurn].discardCards.append(card)
+
+        return 0
+
+    elif card == enums.Card.chapel:  # 10
+        # Chapel - You cannot trash the Chapel itself since it is not in your
+        # hand when you resolve it. You could trash a different Chapel card
+        # if that card were in your hand.
+
+        for i in range(0, state.players[state.whoseTurn].handCardCount()):
+            if handPos != i and enums.Card.chapel == state.players[state.whoseTurn].handCards[i]:
+                state.players[state.whoseTurn].trash.append(state.players[state.whoseTurn].handCards.pop(i))
+                break
+
+        state.players[state.whoseTurn].handCards.pop(handPos)
+        state.players[state.whoseTurn].discardCards.append(card)
 
         return 0
 
     elif card == enums.Card.councilroom:
 
-        # TODO:
+
 
         return 0
 
-    elif card == enums.Card.feast:
-        # gain card with cost up to 5
-        # Backup hand
-        for i in range(state.handCount[currentPlayer] + 1):
-            temphand[i] = state.hand[currentPlayer][i]  # Backup card
-            state.hand[currentPlayer][i] = -1  # Set to nothing
+    elif card == enums.Card.feast:  # 13
+        # The gained card goes into your Discard pile. It has to be a
+        # card from the Supply. You cannot use coins from Treasures or
+        # previous Actions (like the Market) to increase the cost of the
+        # card that you gain.
+
+        # temphand = copy.deepcopy(state.players[currentPlayer].handCards)
+        #
+        # state.players[currentPlayer].handCards = []
+
+        coins = state.players[currentPlayer].coins
 
         # Backup hand
         # Update Coins for Buy
         updateCoins(currentPlayer, state, 5)
-        x = 1  # Condition to loop on
 
-        # while x == 1:  # Buy one card
-        if supplyCount(choice1, state) <= 0:
-            # DEBUG
-            print "None of that card left, sorry!\n"
+        # Buy one card
+        count = supplyCount(choice1, state)
+        if count <= 0:
+            state.error = "None of that card left!"
+            return -1
 
-            print "Cards Left: {0:d}\n".format(supplyCount(choice1, state))
-
-        elif state.coins < getCost(choice1):
-            print "That card is too expensive!\n"
-
-            # DEBUG
-            print "Coins: {0:d} < {1:d}\n".format(state.coins, getCost(choice1))
+        elif state.players[currentPlayer].coins < getCost(choice1):
+            state.error = "That card is too expensive!"
+            return -1
 
         else:
-            # DEBUG
-            print "Deck Count: {0:d}\n".format(state.handCount[currentPlayer] + state.deckCount[currentPlayer] + state.discardCount[currentPlayer])
+            gainCard(choice1, state, 0, currentPlayer)  # Gain the card and put it into discard cards
 
-            result = gainCard(choice1, state, 0, currentPlayer)  # Gain the card
-            assert (result != -1), "The returned value of gainCard should not be -1."
-            x = 0  # No more buying cards
-
-            # DEBUG
-            print "Deck Count: {0:d}\n".format(state.handCount[currentPlayer] + state.deckCount[currentPlayer] + state.discardCount[currentPlayer])
-
-        # Reset Hand
-        for i in range(state.handCount[currentPlayer] + 1):
-            state.hand[currentPlayer][i] = temphand[i]
-            temphand[i] = -1
+        if coins < state.players[currentPlayer].coins:
+            state.players[currentPlayer].coins = coins
 
         return 0
 
@@ -670,7 +946,7 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
                         result = gainCard(enums.Card.estate, state, 0, currentPlayer)
                         assert (result != -1), "The returned value of gainCard should not be -1."
 
-                        state.supplyCount[enums.Card.estate] -= 1  # Decrement estates
+                        state.supplies[enums.Card.estate] -= 1  # Decrement estates
 
                         if supplyCount(enums.Card.estate, state) == 0:
                             isGameOver(state)
@@ -685,7 +961,7 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
                 result = gainCard(enums.Card.estate, state, 0, currentPlayer)  # Gain an estate
                 assert (result != -1), "The returned value of gainCard should not be -1."
 
-                state.supplyCount[enums.Card.estate] -= 1  # Decrement Estates
+                state.supplies[enums.Card.estate] -= 1  # Decrement Estates
 
                 if supplyCount(enums.Card.estate, state) == 0:
                     isGameOver(state)
@@ -833,7 +1109,7 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
         print "Player {0:d} reveals card number: {1:d}\n".format(currentPlayer, state.hand[currentPlayer][choice1])
 
         # increase supply count for choosen card by amount being discarded
-        state.supplyCount[state.hand[currentPlayer][choice1]] += choice2
+        state.supplies[state.hand[currentPlayer][choice1]] += choice2
 
         # each other player gains a copy of revealed card
         for i in range(0, state.numPlayers):
@@ -879,7 +1155,7 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
         state.coins += 2
 
         # see if selected pile is in play
-        if state.supplyCount[choice1] == -1:
+        if state.supplies[choice1] == -1:
             return -1
 
         # add embargo token to selected supply pile
@@ -955,12 +1231,12 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
         return -1
 
 
-def gainCard(supplyPos, state, toFlag, player):
+def gainCard(card, state, toFlag, player):
 
-    # Note: supplyPos is enum of chosen card
+    # Note: card is enum of chosen card
 
     # check if supply pile is empty (0) or card is not used in game (-1)
-    if supplyCount(supplyPos, state) < 1:
+    if supplyCount(card, state) < 1:
         return -1
 
     # added card for [whoseTurn] current player:
@@ -969,22 +1245,29 @@ def gainCard(supplyPos, state, toFlag, player):
     # toFlag = 2 : add to hand
 
     if toFlag == 0:
-        state.discard[player][state.discardCount[player]] = supplyPos
-        state.discardCount[player] += 1
+        state.players[player].discardCards.append(card)
+        # state.discard[player][state.discardCount[player]] = card
+        # state.discardCount[player] += 1
 
     elif toFlag == 1:
-        state.deck[player][state.deckCount[player]] = supplyPos
-        state.deckCount[player] += 1
+        state.players[player].cardsInDeck.append(card)
+
+        # state.deck[player][state.deckCount[player]] = card
+        # state.deckCount[player] += 1
 
     elif toFlag == 2:
-        state.hand[player][state.handCount[player]] = supplyPos
-        state.handCount[player] += 1
+        state.players[player].handCards.append(card)
+
+        # state.hand[player][state.handCount[player]] = card
+        # state.handCount[player] += 1
 
     else:
         return -1
 
     # decrease number in supply pile
-    state.supplyCount[supplyPos] -= 1
+    if state.supplies.updateSupplyCount(card, 1) == -1:
+        state.error = "Failed to update the count of card: {0:d}.".format(card)
+        return -1
 
     return 0
 
@@ -1017,41 +1300,38 @@ def fixCardHole(handPos, player, state):
     return 0
 
 
-# TODO: CHECK THE RETURN VALUE
 def updateCoins(player, state, bonus):
 
-    assert isinstance(state, enums.GameState)
-
-    # reset coin count
-    state.coins = 0
-
-    for i in range(state.handCout[player]):
-        if state.hand[player][i] == enums.Card.copper:
-            state.coins += 1
-        elif state.hand[player][i] == enums.Card.silver:
-            state.coins += 2
-        elif state.hand[player][i] == enums.Card.gold:
-            state.coins += 3
+    for i in range(0, state.players[player].handCardCount()):
+        if state.players[player].handCards[i] == enums.Card.copper:
+            state.players[player].coins += 1
+        elif state.players[player].handCards[i] == enums.Card.silver:
+            state.players[player].coins += 2
+        elif state.players[player].handCards[i] == enums.Card.gold:
+            state.players[player].coins += 3
 
     # add bonus
-    state.coins += bonus
+    state.players[player].coins += bonus
 
     return 0
 
 
+# NON-API functions
+
 # TODO: CHECK THE RETURN VALUE
 def drawCard(player, state):
 
-    assert isinstance(state, enums.GameState)
-
-    if state.deckCount[player] <= 0:  # Deck is empty
+    if state.players[player].deckCount() <= 0:  # Deck is empty
 
         # Step 1 Shuffle the discard pile back into a deck
 
         # Move discard to deck
-        for i in range(state.discardCount[player]):
-            state.deck[player][i] = state.discard[player][i]
-            state.discard[player][i] = -1
+        state.players[player].cardsInDeck.append(state.players[player].discardCards)
+        state.players[player].discardCards = []
+        # for i in range(state.players[player].discardCardCount):
+        #     state.players[player].cardsInDeck.append(state.players[player].discardCards)
+        #     state.deck[player][i] = state.discard[player][i]
+        #     state.discard[player][i] = -1
 
         state.deckCount[player] = state.discardCount[player]
         state.discardCount[player] = 0  # Reset discard
@@ -1080,15 +1360,15 @@ def drawCard(player, state):
         state.handCount[player] += 1  # Increment hand count
 
     else:
-        count = state.handCount[player]  # Get current hand count for player
+        # count = state.players[player].handCardCount()  # Get current hand count for player
+        # deckCounter = state.players[player].deckCount()  # Create holder for the deck count
 
-        # Debug statements
-        print "Current hand count: {0:d}\n".format(count)
+        card = state.players[player].cardsInDeck.pop(0)
+        state.players[player].handCards.append(card)
 
-        deckCounter = state.deckCount[player]  # Create holder for the deck count
-        state.hand[player][count] = state.deck[player][deckCounter - 1]  # Add card to the hand
-        state.deckCount[player] -= 1
-        state.handCount[player] += 1  # Increment hand count
+        # state.hand[player][count] = state.deck[player][deckCounter - 1]  # Add card to the hand
+        # state.deckCount[player] -= 1
+        # state.handCount[player] += 1  # Increment hand count
 
     return 0
 

@@ -5,10 +5,6 @@ import enums
 import dominion
 
 
-if __name__ == "__main__":
-    main(sys.argv[1:])
-
-
 def main(argv):
 
     print "This is the main function, which is the entry of Dominion game."
@@ -17,15 +13,30 @@ def main(argv):
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.adventurer, enums.Card.gardens, enums.Card.embargo,
-                    enums.Card.village, enums.Card.minion, enums.Card.mine,
-                    enums.Card.cutpurse, enums.Card.seahag, enums.Card.tribute,
-                    enums.Card.smithy]
+    kingdomCards = [enums.Card.cellar, enums.Card.market, enums.Card.militia,
+                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
+                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
+                    enums.Card.workshop]
 
-    randomSeed = int(argv[0])
+    # randomSeed = int(argv[0])
+    randomSeed = 1
 
     print "Starting game."
-    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
+
+    # game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
+
+    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+
+    if len(game.error) > 0:
+        print game.error
+        return -1
+
+    game.whoseTurn = 0
+    game.players[game.whoseTurn].handCards = [enums.Card.bureaucrat, enums.Card.market,
+                                             enums.Card.militia, enums.Card.mine,
+                                             enums.Card.moat]
+
+    dominion.playCard(0, 0, 0, 0, game)
 
     # money = 0
     # smithyPos = -1
@@ -39,16 +50,16 @@ def main(argv):
         smithyPos = -1
         adventurerPos = -1
 
-        for i in range(dominion.numHandCards(game)):
-            if dominion.handCard(i, game) == enums.Card.copper:
+        for i in range(game.players[game.whoseTurn].handCardCount()):
+            if game.players[game.whoseTurn].handCards[i] == enums.Card.copper:
                 money += 1
-            elif dominion.handCard(i, game) == enums.Card.silver:
+            elif game.players[game.whoseTurn].handCards[i] == enums.Card.silver:
                 money += 2
-            elif dominion.handCard(i, game) == enums.Card.gold:
+            elif game.players[game.whoseTurn].handCards[i] == enums.Card.gold:
                 money += 3
-            elif dominion.handCard(i, game) == enums.Card.smithy:
+            elif game.players[game.whoseTurn].handCards[i] == enums.Card.smithy:
                 smithyPos = i
-            elif dominion.handCard(i, game) == enums.Card.adventurer:
+            elif game.players[game.whoseTurn].handCards[i] == enums.Card.adventurer:
                 adventurerPos = i
             # Potential Bug: here should be a else statement.
 
@@ -135,13 +146,5 @@ def main(argv):
     print "Player 0: {0:d}\nPlayer 1: {1:d}\n".format(dominion.scoreFor(0, game), dominion.scoreFor(1, game))
 
 
-
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    main(sys.argv[1:])
