@@ -334,43 +334,15 @@ def shuffle(player, state):
     return 0
 
 
-# def random():
+# def qsort(cards):
 #
-#     """
-#     Random returns a pseudo-random real number uniformly distributed between 0.0 and 1.0.
-#
-#     :return:
-#     """
-#
-#     STREAMS = 256
-#     MODULUS = 2147483647
-#     MULTIPLIER = 48271
-#     DEFAULT = 123456789
-#
-#     seed = array('l', [DEFAULT])
-#     stream = 0
-#
-#     Q = MODULUS / MULTIPLIER
-#     R = MODULUS % MULTIPLIER
-#     t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q)
-#
-#     if t > 0:
-#         seed[stream] = t
-#     else:
-#         seed[stream] = t + MODULUS
-#
-#     return seed[stream] / MODULUS
-
-
-def qsort(cards):
-
-    if len(cards) > 0:
-        if len(cards) == 1:
-            return cards
-        else:
-            return qsort([x for x in cards[1:] if x < cards[0]]) + \
-                   [cards[0]] + \
-                   qsort([x for x in cards[1:] if x >= cards[0]])
+#     if len(cards) > 0:
+#         if len(cards) == 1:
+#             return cards
+#         else:
+#             return qsort([x for x in cards[1:] if x < cards[0]]) + \
+#                    [cards[0]] + \
+#                    qsort([x for x in cards[1:] if x >= cards[0]])
 
 
 def playCard(handPos, choice1, choice2, choice3, game):
@@ -552,21 +524,26 @@ def supplyCount(card, state):
 
 
 def fullDeckCount(player, card, state):
-
-    assert isinstance(state, enums.GameState)
+    """
+    Here deck = hand + discard + deck
+    :param player:
+    :param card:
+    :param state:
+    :return:
+    """
 
     count = 0
 
-    for i in range(state.deckCount[player]):
-        if state.deck[player][i] == card:
+    for i in range(state.players[player].deckCount()):
+        if state.players[player].cardsInDeck[i] == card:
             count += 1
 
-    for i in range(state.handCount[player]):
-        if state.hand[player][i] == card:
+    for i in range(state.players[player].handCardCount()):
+        if state.players[player].handCards[i] == card:
             count += 1
 
-    for i in range(state.discardCount[player]):
-        if state.discard[player][i] == card:
+    for i in range(state.players[player].discardCardCount()):
+        if state.players[player].discardCards[i] == card:
             count += 1
 
     return count
@@ -576,42 +553,31 @@ def whoseTurn(state):
     return state.whoseTurn
 
 
-# TODO: CHECK THE RETURN VALUE
 def endTurn(state):
 
-    # assert isinstance(state, enums.GameState)
-    #
-    # currentPlayer = whoseTurn(state)
-    #
-    # # Discard hand
-    # for i in range(state.handCount[currentPlayer]):
-    #     state.discardCount[currentPlayer] += 1
-    #     state.discard[currentPlayer][state.discardCount[currentPlayer]] = state.hand[currentPlayer][i]
-    #     state.hand[currentPlayer][i] = -1  # Set card to -1
-    #
-    # state.handCount[currentPlayer] = 0  # Reset hand count
-    #
-    # # Code for determining the player
-    # if currentPlayer < (state.players - 1):
-    #     state.whoseTurn = currentPlayer + 1  # Still safe to increment
-    # else:
-    #     state.whoseTurn = 0  # Max player has been reached, loop back around to player 1
-    #
-    # state.outpostPlayed = 0
-    # state.phase = 0
-    # state.numActions = 1
-    # state.coins = 0
-    # state.numBuys = 1
-    # state.playedCardCount = 0
-    # state.handCount[state.whoseTurn] = 0
-    #
-    # # int k; move to top
-    # # Next player draws hand
-    # for k in range(5):
-    #     drawCard(state.whoseTurn, state)  # Draw a card
-    #
-    # # Update money
-    # updateCoins(state.whoseTurn, state, 0)
+    currentPlayer = whoseTurn(state)
+
+    # Discard hand
+    state.players[currentPlayer].discardCards.append(state.players[currentPlayer].handCards)
+    state.players[currentPlayer].handCards = []
+
+    # determine next player
+    state.whoseTurn = (currentPlayer + 1) % len(state.players)
+
+    state.outpostPlayed = 0
+    state.phase = 0
+    state.numActions = 1
+    state.coins = 0
+    state.numBuys = 1
+    state.playedCardCount = 0
+    state.players[state.whoseTurn].handCards = []
+
+    # Next player draws 5 handcards
+    for k in range(0, 5):
+        drawCard(state.whoseTurn, state)
+
+    # Update money
+    updateCoins(state.whoseTurn, state, 0)
 
     return 0
 
@@ -661,6 +627,7 @@ def isGameOver(state):
         return False
 
 
+# TODO: need to refactor
 def scoreFor(player, state):
 
     # assert isinstance(state, enums.GameState)
@@ -811,12 +778,40 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
                     if enums.Card.estate <= state.players[i].handCards[j] <= enums.Card.province:
                         victory = state.players[i].handCards.pop(j)
                         state.players[i].cardsInDeck.insert(0, victory)
+                        handPos += 1
                         break
 
         state.players[currentPlayer].handCards.pop(handPos)
         state.players[currentPlayer].cardsInDeck.append(card)
 
         state.players[currentPlayer].silver += 1
+
+        return 0
+
+    elif card == enums.Card.cellar:  # 9
+        # Cellar - You can't discard Cellar to itself, since it isn't in your
+        # hand any longer when you resolve it. You choose what cards to
+        # discard and discard them all at once. You only draw cards after
+        # you have discarded. If you have to shuffle to do the drawing, the
+        # discarded cards will end up shuffled into your new Deck.
+
+        choices = [choice1, choice2, choice3]
+        newcards = 0
+        for i in range(0, len(choices)):
+            if 0 <= choices[i] <= state.players[currentPlayer].handCardCount() - 1 and choices[i] != handPos:
+                state.players[currentPlayer].handCards.pop(choices[i])
+                if choices[i] < handPos:
+                    handPos -= 1
+
+                state.players[currentPlayer].discardCards.append(choices[i])
+                newcards += 1
+
+        for i in range(0, newcards):
+            drawCard(currentPlayer, state)
+
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
+        state.numActions += 1
 
         return 0
 
@@ -832,6 +827,23 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
         state.players[currentPlayer].handCards.pop(handPos)
         state.players[currentPlayer].discardCards.append(card)
+
+        return 0
+
+    elif card == enums.Card.chancellor:  # 11
+        # Chancellor - You must resolve the Chancellor (decide whether or
+        # not to discard your Deck by flipping it into your Discard pile)
+        # before doing other things on your turn, like deciding what to
+        # buy or playing another Action card. You may not look through
+        # your Deck as you discard it.
+
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
+
+        state.players[currentPlayer].coins += 2
+
+        state.players[currentPlayer].discardCards.extend(state.players[currentPlayer].cardsInDeck)
+        state.players[currentPlayer].cardsInDeck = []
 
         return 0
 
@@ -885,8 +897,33 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
         return 0
 
-    elif card == enums.Card.gardens:
+    elif card == enums.Card.festival:  # 14
+        # Festival - it gives both 2 actions, 2 coins, and 1 Buy.
+
+        state.numActions += 2
+        state.numBuys += 1
+        state.players[currentPlayer].coins += 2
+
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
+
+        return 0
+
+    elif card == enums.Card.gardens:  # 15
         return -1
+
+    elif card == enums.Card.laboratory:  # 16
+        # Laboratory - It increases your handsize by giving you +2 cards,
+        # and then gives +1 action so you can keep playing more actions.
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
+
+        state.numActions += 2
+
+        drawCard(currentPlayer, state)
+        drawCard(currentPlayer, state)
+
+        return 0
 
     elif card == enums.Card.mine:
         j = state.hand[currentPlayer][choice1]  # store card we will trash

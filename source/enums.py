@@ -211,6 +211,7 @@ class GamePlayer:
         self.handCards = []
         self.discardCards = []
         self.cardsInDeck = []  # (cardName, cardCount)
+        self.trash = []
 
         self.gold = 0
         self.silver = 0
@@ -220,8 +221,6 @@ class GamePlayer:
         self.estateCount = 0
         self.duchyCount = 0
         self.provinceCount = 0
-
-        self.trash = []
 
     def handCardCount(self):
         return len(self.handCards)
