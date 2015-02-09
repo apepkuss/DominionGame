@@ -16,16 +16,16 @@ def runCouncilroomTestCase1():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.market, enums.Card.adventurer, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error

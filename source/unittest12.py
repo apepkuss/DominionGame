@@ -5,11 +5,11 @@ import enums
 import dominion
 
 
-def runLaboratoryTestCase1():
+def runVillageTestCase1():
     """
-    Precondition: There should be at least a laboratory card in hand.
-    Test case description: play the laboratory card in hand.
-    Expected result: +2 cards in hand and +1 action.
+    Precondition: There should be at least a village card in hand.
+    Test case description: play the village card in hand.
+    Expected result: +2 actions and +1 Card.
     """
 
     # The number of players
@@ -32,7 +32,7 @@ def runLaboratoryTestCase1():
         return
 
     game.whoseTurn = 0
-    game.players[game.whoseTurn].handCards = [enums.Card.laboratory, enums.Card.bureaucrat,
+    game.players[game.whoseTurn].handCards = [enums.Card.village, enums.Card.bureaucrat,
                                              enums.Card.adventurer, enums.Card.chapel,
                                              enums.Card.cellar]
 
@@ -44,15 +44,15 @@ def runLaboratoryTestCase1():
     actionsafter = game.numActions
     handsizeafter = game.players[game.whoseTurn].handCardCount()
 
-    if actionsbefore == actionsafter - 1 and handsizebefore == handsizeafter - 1:
-        print "test case 1 for laboratory card: Passed!\n"
+    if actionsbefore == actionsafter - 1 and handsizebefore == handsizeafter:
+        print "test case 1 for village card: Passed!\n"
     else:
-        print "test case 1 for laboratory card: Failed.\n"
+        print "test case 1 for village card: Failed.\n"
 
 
 def main(argv):
 
-    runLaboratoryTestCase1()
+    runVillageTestCase1()
 
 
 if __name__ == "__main__":

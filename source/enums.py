@@ -28,37 +28,9 @@ class Card(Enum):
     festival = 14
     gardens = 15  # not action card
     laboratory = 16
-    library = 17
-    market = 18
-    militia = 19
-    mine = 20
-    moat = 21
-    moneylender = 22
-    remodel = 23
-    smithy = 24
-    spy = 25
-    thief = 26
-    throneroom = 27
-    village = 28
-    witch = 29
-    woodcutter = 30
-    workshop = 31
-
-    # baron = 31  # choice1: boolean for discard of estate
-    # #  Discard is always of first (lowest index) estate
-    # greathall = 32
-    # minion = 33  # choice1:  1 = +2 coin, 2 = redraw
-    # steward = 34  # choice1: 1 = +2 card, 2 = +2 coin, 3 = trash 2 (choice2,3)
-    # tribute = 35
-    #
-    # ambassador = 36  # choice1 = hand#, choice2 = number to return to supply.
-    # cutpurse = 37
-    # embargo = 38  # choice1 = supply*
-    # outpost = 39
-    # salvanger = 40  # choice1 = hand# to trash
-    # seahag = 41
-
-    treasuremap = 41
+    seahag = 17
+    smithy = 18
+    village = 19
 
 
 class GamePhase(Enum):
@@ -73,22 +45,10 @@ class GameState:
     def __init__(self, playerCount):
         self.players = {}
         self.supplies = Supply()
-        self.embargoTokens = []
-        self.outpostPlayed = 0
-        self.outpostTurn = 0
         self.whoseTurn = 0  # 0: player1; 1: player2
         self.phase = GamePhase.unknown
         self.numActions = 1  # Starts at 1 each turn
-        self.coins = 0  # the money you have
         self.numBuys = 1  # Starts at 1 each turn
-        self.hand = [[]]
-        self.handCount = []  # the number of cards current player has in hand
-        # self.deck = [[]]
-        # self.deckCount = [[]]
-        # self.discard = [[]]
-        # self.discardCount = []
-        self.playedCards = []
-        self.playedCardCount = 0
         self.error = ""
 
         self.createPlayers(playerCount)
@@ -109,31 +69,6 @@ class Supply:
         # 252 kingdom cards =
         # 240 action cards (10 of each) + 12 victory cards (namely, 12 garden cards)
         self.kingdoms = []
-        self.adventurerCount = -1
-        self.bureaucratCount = -1  # action attack card
-        self.cellarCount = -1
-        self.chapelCount = -1
-        self.chancellorCount = -1
-        self.councilroomCount = -1
-        self.feastCount = -1
-        self.festivalCount = -1
-        self.gardensCount = -1  # victory cards
-        self.laboratoryCount = -1
-        self.libraryCount = -1
-        self.marketCount = -1
-        self.militiaCount = -1
-        self.mineCount = -1
-        self.moatCount = -1  # action-reaction card
-        self.moneylenderCount = -1
-        self.remodelCount = -1
-        self.smithyCount = -1
-        self.spyCount = -1
-        self.thiefCount = -1
-        self.throneroomCount = -1
-        self.villageCount = -1
-        self.witchCount = -1
-        self.woodcutterCount = -1
-        self.workshopCount = -1
 
         # 10 Curse cards in the Supply for a 2 player game,
         # 20 Curse cards for 3 players, and
@@ -157,18 +92,6 @@ class Supply:
         self.silverCount = 40
         self.goldCount = 30
 
-        # self.baronCount = 0
-        # self.greathallCount = 0
-        # self.minionCount = 0
-        # self.stewardCount = 0
-        # self.tributeCount = 0
-        # self.ambassadorCount = 0
-        # self.cutpurseCount = 0
-        # self.embargoCount = 0
-        # self.outpostCount = 0
-        # self.salvangerCount = 0
-        # self.seahagCount = 0
-        # self.treasuremapCount = 0
 
     def setSupplyKingdoms(self, kingdomcards):
         for i in range(0, len(kingdomcards)):
@@ -221,6 +144,8 @@ class GamePlayer:
         self.estateCount = 0
         self.duchyCount = 0
         self.provinceCount = 0
+
+        self.credits = 0
 
     def handCardCount(self):
         return len(self.handCards)

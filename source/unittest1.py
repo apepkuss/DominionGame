@@ -25,7 +25,7 @@ def runChapelTestCase1():
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error
@@ -62,25 +62,25 @@ def runChapelTestCase2():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.chapel, enums.Card.market, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error
         return
 
     game.whoseTurn = 0
-    game.players[game.whoseTurn].handCards = [enums.Card.chapel, enums.Card.market,
-                                             enums.Card.militia, enums.Card.mine,
-                                             enums.Card.moat]
+    game.players[game.whoseTurn].handCards = [enums.Card.chapel, enums.Card.councilroom,
+                                             enums.Card.gardens, enums.Card.chancellor,
+                                             enums.Card.chapel]
 
     trashsize = len(game.players[game.whoseTurn].trash)
 

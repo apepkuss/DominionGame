@@ -16,16 +16,16 @@ def runFeastTestCase1():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.market, enums.Card.adventurer, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kkingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error
@@ -61,16 +61,16 @@ def runFeastTestCase2():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.market, enums.Card.adventurer, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error
@@ -107,16 +107,16 @@ def runFeastTestCase3():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.market, enums.Card.adventurer, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
     print "Starting game."
 
-    game = dominion.initialize(numPlayers, kingdomCards, randomSeed)
+    game = dominion.initializeGame(numPlayers, kingdomCards, randomSeed)
 
     if len(game.error) > 0:
         print game.error
@@ -125,7 +125,7 @@ def runFeastTestCase3():
     game.whoseTurn = 0
 
     # precondition 1
-    game.players[game.whoseTurn].handCards = [enums.Card.feast, enums.Card.militia,
+    game.players[game.whoseTurn].handCards = [enums.Card.feast, enums.Card.laboratory,
                                              enums.Card.estate, enums.Card.chapel,
                                              enums.Card.village]
     # precondition 2
