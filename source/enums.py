@@ -19,17 +19,17 @@ class Card(Enum):
 
     # kingdom cards
     adventurer = 7
-    bureaucrat = 8
+    bureaucrat = 8  # action attack card
     cellar = 9
     chapel = 10
     chancellor = 11
     councilroom = 12
     feast = 13
     festival = 14
-    gardens = 15
+    gardens = 15  # not action card
     laboratory = 16
     library = 17
-    market = 8
+    market = 18
     militia = 19
     mine = 20
     moat = 21

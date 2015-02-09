@@ -373,7 +373,6 @@ def qsort(cards):
                    qsort([x for x in cards[1:] if x >= cards[0]])
 
 
-# TODO: CHECK THE RETURN VALUE
 def playCard(handPos, choice1, choice2, choice3, game):
     """
     Play card with index handPos from current player's hand
@@ -800,6 +799,27 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
         return 0
 
+    elif card == enums.Card.bureaucrat:  # 8
+        # Bureaucrat - If you have no cards left in your Deck when you
+        # play this card, the Silver you gain will become the only card in
+        # your Deck. Similarly, if another player has no cards in his Deck,
+        # the Victory card he puts on top will become the only card in his Deck.
+
+        for i in range(0, len(state.players)):
+            if i != currentPlayer:
+                for j in range(0, state.players[i].handCardCount()):
+                    if enums.Card.estate <= state.players[i].handCards[j] <= enums.Card.province:
+                        victory = state.players[i].handCards.pop(j)
+                        state.players[i].cardsInDeck.insert(0, victory)
+                        break
+
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].cardsInDeck.append(card)
+
+        state.players[currentPlayer].silver += 1
+
+        return 0
+
     elif card == enums.Card.chapel:  # 10
         # Chapel - You cannot trash the Chapel itself since it is not in your
         # hand when you resolve it. You could trash a different Chapel card
@@ -810,14 +830,21 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
                 state.players[state.whoseTurn].trash.append(state.players[state.whoseTurn].handCards.pop(i))
                 break
 
-        state.players[state.whoseTurn].handCards.pop(handPos)
-        state.players[state.whoseTurn].discardCards.append(card)
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
 
         return 0
 
-    elif card == enums.Card.councilroom:
+    elif card == enums.Card.councilroom:  # 12
+        # Council Room -The other players must draw a card whether
+        # they want to or not. All players should shuffle as necessary.
 
+        for i in range(0, len(state.players)):
+            if i != currentPlayer:
+                drawCard(i, state)
 
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
 
         return 0
 
@@ -852,6 +879,9 @@ def cardEffect(card, choice1, choice2, choice3, state, handPos, bonus):
 
         if coins < state.players[currentPlayer].coins:
             state.players[currentPlayer].coins = coins
+
+        state.players[currentPlayer].handCards.pop(handPos)
+        state.players[currentPlayer].discardCards.append(card)
 
         return 0
 
