@@ -18,19 +18,19 @@ class Card(Enum):
     gold = 6
 
     # kingdom cards
-    adventurer = 7
-    bureaucrat = 8  # action attack card
-    cellar = 9
-    chapel = 10
-    chancellor = 11
-    councilroom = 12
-    feast = 13
-    festival = 14
+    adventurer = 7    # action card
+    bureaucrat = 8    # action attack card
+    cellar = 9        # action card
+    chapel = 10       # action card
+    chancellor = 11   # action card
+    councilroom = 12  # action card
+    feast = 13        # action card
+    festival = 14     # action card
     gardens = 15  # not action card
-    laboratory = 16
-    seahag = 17
-    smithy = 18
-    village = 19
+    laboratory = 16   # action card
+    seahag = 17       # action attack card
+    smithy = 18       # action card
+    village = 19      # action card
 
 
 class GamePhase(Enum):

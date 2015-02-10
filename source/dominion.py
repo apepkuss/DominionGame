@@ -143,18 +143,28 @@ def playCard(handPos, choice1, choice2, choice3, game):
 
     #  check if it is the right phase
     if game.phase != 0:
+        game.error = "Not allowed to play card in non-action phase.\n"
         return -1
 
     # check if player has enough actions
     if game.numActions < 1:
+        game.error = "Not allowed to play card when the number of actions is less than 1.\n"
         return -1
 
     # get card played
     card = handCard(handPos, game)
 
     # check if selected card is an action
-    # if card < enums.Card.adventurer or card > enums.Card.treasuremap:
-    #     return -1
+    if card > enums.Card.village:
+        game.error = "This is an invalid card.\n"
+        return -1
+    elif card < enums.Card.adventurer or card > enums.Card.village or card == enums.Card.gardens:
+        for i in range(0, len(game.players)):
+            if i != handPos \
+                    and enums.Card.adventurer <= game.players[game.whoseTurn].handCards[i] <= enums.Card.village \
+                    and card != enums.Card.gardens:
+                game.error = "Play action cards first."
+                return -1
 
     # play card
     coinbonus = 0  # tracks coins gain from actions
@@ -183,15 +193,15 @@ def buyCard(supplyPos, game):
     who = game.whoseTurn
 
     if game.numBuys < 1:
-        print "You do not have any buys left\n"
+        game.error = "You do not have any buys left\n"
         return -1
 
     elif supplyCount(supplyPos, game) < 1:
-        print "There are not any of that type of card left\n"
+        game.error = "There are not any of that type of card left\n"
         return -1
 
     elif game.players[game.whoseTurn].coins < helper.getCost(supplyPos):
-        print "You do not have enough money to buy that. You have {0:d} coins.\n".format(game.players[game.whoseTurn])
+        game.error = "You do not have enough money to buy that.\n"
         return -1
 
     else:
@@ -202,7 +212,7 @@ def buyCard(supplyPos, game):
             return result
 
         # pay for the new card
-        game.players[game.whoseTurn] -= helper.getCost(supplyPos)
+        game.players[game.whoseTurn].coins -= helper.getCost(supplyPos)
         game.numBuys -= 1
 
     return 0
@@ -386,15 +396,15 @@ def scoreFor(player, game):
 
     # score from hand
     for i in range(0, len(playercards)):
-        if game.hand[player][i] == enums.Card.curse:
+        if playercards[i] == enums.Card.curse:
             score -= 1
-        elif game.hand[player][i] == enums.Card.estate:
+        elif playercards[i] == enums.Card.estate:
             score += 1
-        elif game.hand[player][i] == enums.Card.duchy:
+        elif playercards[i] == enums.Card.duchy:
             score += 3
-        elif game.hand[player][i] == enums.Card.province:
+        elif playercards[i] == enums.Card.province:
             score += 6
-        elif game.hand[player][i] == enums.Card.gardens:
+        elif playercards[i] == enums.Card.gardens:
             score += (fullDeckCount(player, 0, game) / 10)
 
     return score
