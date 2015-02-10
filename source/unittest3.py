@@ -16,7 +16,7 @@ def runFeastTestCase1():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kkingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
                     enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
                     enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
                     enums.Card.festival]

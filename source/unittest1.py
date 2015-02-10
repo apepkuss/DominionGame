@@ -16,10 +16,10 @@ def runChapelTestCase1():
     numPlayers = 2
 
     # 10 kinds of kingdom cards
-    kingdomCards = [enums.Card.chapel, enums.Card.market, enums.Card.militia,
-                    enums.Card.mine, enums.Card.moat, enums.Card.remodel,
-                    enums.Card.smithy, enums.Card.village, enums.Card.woodcutter,
-                    enums.Card.workshop]
+    kingdomCards = [enums.Card.laboratory, enums.Card.adventurer, enums.Card.bureaucrat,
+                    enums.Card.village, enums.Card.gardens, enums.Card.councilroom,
+                    enums.Card.cellar, enums.Card.chancellor, enums.Card.chapel,
+                    enums.Card.festival]
 
     randomSeed = 1
 
@@ -32,9 +32,9 @@ def runChapelTestCase1():
         return
 
     game.whoseTurn = 0
-    game.players[game.whoseTurn].handCards = [enums.Card.chapel, enums.Card.market,
-                                             enums.Card.militia, enums.Card.chapel,
-                                             enums.Card.moat]
+    game.players[game.whoseTurn].handCards = [enums.Card.chapel, enums.Card.councilroom,
+                                             enums.Card.gardens, enums.Card.chancellor,
+                                             enums.Card.chapel]
 
     trashsize = len(game.players[game.whoseTurn].trash)
 
@@ -80,7 +80,7 @@ def runChapelTestCase2():
     game.whoseTurn = 0
     game.players[game.whoseTurn].handCards = [enums.Card.chapel, enums.Card.councilroom,
                                              enums.Card.gardens, enums.Card.chancellor,
-                                             enums.Card.chapel]
+                                             enums.Card.adventurer]
 
     trashsize = len(game.players[game.whoseTurn].trash)
 

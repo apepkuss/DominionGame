@@ -88,7 +88,7 @@ def runPlaycardTestCase2():
 
     result = dominion.playCard(0, -1, -1, -1, game)
 
-    if result == -1 and game.error == "This is an invalid card.\n":
+    if result == -1 and game.error == "Play action cards first.":
         print "test case 2 for playCard function when playing non-action cards: Passed!\n"
     else:
         print "test case 2 for playCard function when playing non-action cards: Failed.\n"
