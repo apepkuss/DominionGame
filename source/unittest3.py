@@ -42,7 +42,7 @@ def runFeastTestCase1():
 
     discardcardcountafter = game.players[game.whoseTurn].discardCardCount()
 
-    if discardcountbefore == discardcardcountafter - 1:
+    if discardcountbefore == discardcardcountafter - 2:
         print "test case 1 for feast card: Passed!\n"
     else:
         print "test case 1 for feast card: Failed.\n"

@@ -29,13 +29,6 @@ def runGetWinnerTestCase1():
         print game.error
         return
 
-    game.players[0].handCards = [enums.Card.curse, enums.Card.estate,
-                                 enums.Card.duchy, enums.Card.province,
-                                 enums.Card.gardens]
-
-    game.players[1].handCards = [enums.Card.curse, enums.Card.estate,
-                                 enums.Card.duchy, enums.Card.province,
-                                 enums.Card.gardens]
     game.whoseTurn = 0
 
     winners = dominion.getWinners(game.players, game)
@@ -70,13 +63,6 @@ def runGetWinnerTestCase2():
         print game.error
         return
 
-    game.players[0].handCards = [enums.Card.curse, enums.Card.estate,
-                                 enums.Card.duchy, enums.Card.province,
-                                 enums.Card.gardens]
-
-    game.players[1].handCards = [enums.Card.curse, enums.Card.estate,
-                                 enums.Card.duchy, enums.Card.province,
-                                 enums.Card.gardens]
     game.whoseTurn = 1
 
     winners = dominion.getWinners(game.players, game)

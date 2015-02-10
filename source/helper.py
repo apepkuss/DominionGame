@@ -137,12 +137,7 @@ def cardEffect(card, choice1, choice2, choice3, game, handPos, bonus):
     elif card == enums.Card.feast:  # 13
         # The gained card goes into your Discard pile. It has to be a
         # card from the Supply. You cannot use coins from Treasures or
-        # previous Actions (like the Market) to increase the cost of the
-        # card that you gain.
-
-        # temphand = copy.deepcopy(game.players[currentPlayer].handCards)
-        #
-        # game.players[currentPlayer].handCards = []
+        # previous Actions to increase the cost of the card that you gain.
 
         coins = game.players[currentPlayer].coins
 
@@ -161,13 +156,15 @@ def cardEffect(card, choice1, choice2, choice3, game, handPos, bonus):
             return -1
 
         else:
+            game.players[currentPlayer].handCards.pop(handPos)
+            game.players[currentPlayer].discardCards.append(card)
+
             gainCard(choice1, game, 0, currentPlayer)  # Gain the card and put it into discard cards
 
         if coins < game.players[currentPlayer].coins:
             game.players[currentPlayer].coins = coins
 
-        game.players[currentPlayer].handCards.pop(handPos)
-        game.players[currentPlayer].discardCards.append(card)
+
 
         return 0
 
